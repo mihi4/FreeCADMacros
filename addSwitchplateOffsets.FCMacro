@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+
+# Macro Begin: C:\Users\michi\AppData\Roaming\FreeCAD\Macro\addSwitchplateOffsets.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import FreeCAD
+import Sketcher
+import re
+
+
+print ("Starting SwitchplateOffset")
+
+def get_ConsText(x):
+  return ("Constraints["+str(x)+"]")
+
+activeSketch = Gui.ActiveDocument.getInEdit().Object 
+
+selection = Gui.Selection.getSelectionEx();
+sketch = selection[0];
+pointNames = sketch.SubElementNames
+pointNum = len(pointNames);
+
+pointindizes = []
+for x in pointNames:
+  Number = re.findall(r'\d+',x)
+  index = int(Number[0])
+  pointindizes.append(index-1)
+
+points = []
+for y in pointindizes:
+  pointindex = activeSketch.getGeoVertexIndex(y)
+  points.append(pointindex)
+
+offsetwidth = App.ActiveDocument.Spreadsheet.switchplate_offset_width
+offsetheight = App.ActiveDocument.Spreadsheet.switchplate_offset_height
+
+cons = activeSketch.addConstraint(Sketcher.Constraint('DistanceX', points[0][0], points[0][1], points[1][0], points[1][1],  App.Units.Quantity('5.0 mm')))
+activeSketch.setExpression(get_ConsText(cons), str(offsetwidth));
+App.ActiveDocument.recompute()
+cons = activeSketch.addConstraint(Sketcher.Constraint('DistanceY', points[0][0], points[0][1], points[1][0], points[1][1], App.Units.Quantity('2.0 mm')))
+activeSketch.setExpression(get_ConsText(cons), str(offsetheight));
+App.ActiveDocument.recompute()
+cons = activeSketch.addConstraint(Sketcher.Constraint('DistanceX', points[2][0], points[2][1], points[3][0], points[3][1], App.Units.Quantity('5.0 mm')))
+activeSketch.setExpression(get_ConsText(cons), str(offsetwidth));
+App.ActiveDocument.recompute()
+cons = activeSketch.addConstraint(Sketcher.Constraint('DistanceY', points[2][0], points[2][1], points[3][0], points[3][1], App.Units.Quantity('2.0 mm')))
+activeSketch.setExpression(get_ConsText(cons), str(offsetheight));
+App.ActiveDocument.recompute()
+
+print("SwitchplateOffset finished");
+
+
